@@ -11,18 +11,12 @@ Nugget_Interface::Nugget_Interface() {
 
 }
 
-void Nugget_Interface::addKeyMap(String* keyMapVals) {
+// accept 4 unique values and pass String to provided function
+void Nugget_Interface::addMenuKeyMap(String* keyMapVals) {
     this->keyMapVals = keyMapVals;
     keyMapEnabled = true;
-    // ::display.fillTriangle(0,0,0,9,5,4);
-    // ::display.fillTriangle(0,10,0,19,5,14);
-    // ::display.fillTriangle(0,20,0,29,5,24);
-    // ::display.fillTriangle(0,30,0,39,5,34);
+    menuType = 3;
 
-    // ::display.drawString(7,0,keyMapVals[0]);
-    // ::display.drawString(7,10,keyMapVals[1]);
-    // ::display.drawString(0,20,keyMapVals[2]);
-    // ::display.drawString(0,30,keyMapVals[3]);
     String direction[] = {"UP", "LT", "RT", "DN" };
     for (int i=0; i<4; i++) {
         if (keyMapVals[i].length() < 10) { ::display.drawString(0,10*i,direction[i]+":"+keyMapVals[i]); }
@@ -73,6 +67,37 @@ void Nugget_Interface::addKeyMap(String* keyMapVals) {
 //   ::display.drawString(94, 0, secondaryText);
 // }
 
+
+
+
+
+
+
+/* HEADER */
+// check if same variable can be set via overload
+
+void Nugget_Interface::setHeader(String headerText){
+    headerEnabled = true;
+    this->headerText = headerText;
+}
+
+void Nugget_Interface::setHeader(String headerText, String subHeaderText){
+    headerEnabled = true;
+    this->headerText = headerText;
+    this->subHeaderText = subHeaderText;
+}
+
+
+/* FOOTER */
+
+void Nugget_Interface::setFooter(String footerText) {
+  footerEnabled = true;
+  this->footerText = footerText;
+  this->footerText.toUpperCase(); // uppercase for stylistic purposes
+}
+
+
+
 // bool notInSelectPool(String selectText) {
 //   for (int i=0; i<selectPoolCount; i++) {
 //     if (selectText.equals(selectPool[i])) return false;
@@ -80,9 +105,12 @@ void Nugget_Interface::addKeyMap(String* keyMapVals) {
 //   return true;  
 // }
 
-// void MenuInterface::addScroller(String* scrollerTextValues, uint8_t numScrollerValues) {
-//   this->scrollerTextValues = scrollerTextValues;
+// void MenuInterface::addMenuScroller(String* scrollerValues, uint8_t numScrollerValues) {
+//   this->scrollerValues = scrollerValues;
 //   this->numScrollerValues = numScrollerValues;
+
+//   uint8_t menuType = 1;
+// }
 
 //   scrollerMenu = true; scrollerSelectMenu = false;
 //   scrollerPos = 0;
@@ -134,25 +162,19 @@ void Nugget_Interface::addKeyMap(String* keyMapVals) {
 //   footerEnabled = true; dynamicFooter = true;
 // }
 
-void Nugget_Interface::addFooter(String footerText) {
-  this->footerText = footerText;
-  footerEnabled = true;  dynamicFooter = false;
-}
 
-void Nugget_Interface::addNav(void (*function1)()) {
-  this->function1 = function1;
-  navCount = 1;
-}   
+// NAVIGATION
 
-void Nugget_Interface::addNav(void (*sfunction)(char* param)) {
-    this->sfunction = sfunction;
-}
-
-// void MenuInterface::addNav(void (*function1)(), void (*function2)()) {
-//   this->function1 = function1;
-//   this->function2 = function2;
-//   navCount = 2;
+// void Nugget_Interface::addNav(void (*sfunction)(char* param)) {
+//     this->sfunction = sfunction;
 // }
+
+void Nugget_Interface::setNav(void (*functionLeft)(), void (*functionRight)()) {
+  this->functionLeft = functionLeft;
+  this->functionRight = functionRight;
+
+  footerEnabled = true;
+}
 
 // void MenuInterface::addDashboard(unsigned char* dbGraphics, String* dbText, uint8_t dbCount) {
 //   this->dbGraphics = dbGraphics;
@@ -200,20 +222,6 @@ void Nugget_Interface::addNav(void (*sfunction)(char* param)) {
 //       }
 //     }
 //   }
-// }
-
-// // temporary method
-// void MenuInterface::addSimpleMonitor(uint8_t monitorCount) {
-//   this->monitorCount = monitorCount;
-//   monitorEn = true;
-//   ::display.drawString(0,17,"Deauthing "+(String) monitorCount);
-//   ::display.drawString(0,27,"clients from");
-//   String tmpBSSID = apList[scrollIndex][0];
-//   tmpBSSID.replace(":","");
-//   ::display.drawString(0,37,tmpBSSID);
-//   ::display.drawXbm(4,0,128,64,attack_bits);
-//   // wifiScanner.deauthClients();
-
 // }
 
 // void MenuInterface::updateDisplay(bool override) { // override variable doesn't even matter
@@ -328,13 +336,22 @@ void Nugget_Interface::addNav(void (*sfunction)(char* param)) {
 //   // }
 // }
 void Nugget_Interface::updateFooter() {
-    this->footerText = footerText;
-    ::display.drawLine(0, 54, 127, 54);
-    ::display.drawLine(0, 53, 127, 53);
-    
-    ::display.drawString(0,54,"Dir:");
-    ::display.drawString(25, 54, footerText);
-    ::display.display();
+    if (footerEnabled) {
+        ::display.drawLine(0, 54, 127, 54);
+        ::display.drawLine(0, 53, 127, 53);
+        
+        // draw centered footer text
+        ::display.drawString((127-display.getStringWidth(footerText))/2, 53, footerText);
+        
+        if (functionLeft) {
+            display.drawRect(9,55,2,9);
+            display.fillTriangle(1, 60, 4, 57, 4, 63);
+        }
+        if (functionRight) {
+            display.drawRect(117,55,2,9);
+            display.fillTriangle(126, 60, 123, 57, 123, 63);
+        }
+    }
 }
 
 void Nugget_Interface::updateNav() {
@@ -361,13 +378,40 @@ void Nugget_Interface::updateNav() {
     }
 }
 
+
+
+void Nugget_Interface::updateHeader() {
+
+    if (headerEnabled && menuType!=3) {
+        ::display.drawLine(0,13,127,13);
+        ::display.drawLine(0,14,127,14);
+
+        
+        // if subHeader parameter provided
+        if(!subHeaderText.equals("")) {
+            subHeaderText = subHeaderText.length()>10 ? subHeaderText.substring(0,7)+"..." : subHeaderText;
+            
+            uint8_t textDivider = 123-display.getStringWidth(subHeaderText);
+            ::display.drawString(textDivider+4,0,subHeaderText);
+            ::display.drawLine(textDivider,0,textDivider,14);
+            ::display.drawLine(textDivider+1,0,textDivider+1,14);
+        }
+
+        headerText = headerText.length()>(20-subHeaderText.length()) ? headerText.substring(0,17-subHeaderText.length())+"..." : headerText;
+        ::display.drawString(0,0,headerText);
+    }
+}
+
 void Nugget_Interface::updateDisplay() {
-    ::display.display();
+    updateHeader();
+
+
     if (keyMapEnabled) {
-        addKeyMap(keyMapVals);
+        addMenuKeyMap(keyMapVals);
     }
     updateFooter();
     updateNav();
+    ::display.display();
 }
 
 void Nugget_Interface::autoUpdateDisplay() { // updates UI display and loops until button input provided
