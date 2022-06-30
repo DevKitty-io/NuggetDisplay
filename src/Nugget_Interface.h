@@ -3,113 +3,66 @@
 #include "Arduino.h"
 #include "SH1106Wire.h"
 #include "Nugget_Buttons.h"
- 
-// #include "WiFiScanner.h"
 
 extern SH1106Wire display;
 extern Nugget_Buttons nuggButtons;
 
-// extern uint8_t scrollIndex;
-// extern bool rescanClients;
-// extern WiFiScanner wifiScanner; // this shouldn't be here
+// add dashboard, loader bar?
 
 class Nugget_Interface {
+
   public:
     Nugget_Interface();
 
+    /* ----- HEADER ----- */
     void setHeader(String headerText);
     void setHeader(String headerText, String subHeaderText);
-
+    
+    /* ----- FOOTER ----- */
     void setFooter(String footerText);
-//     // basic lateral scrolling menu w/ arrows
-//     MenuInterface(String menuText, int8_t numArrows);
-    
-    // void init();
-//     void addTitle();
-//     void addLoader(bool ready, uint8_t timeEstimate);
-    
-//     /* Footer */
-//     void addFooter(String* footerTextValues, unsigned char* scrollIconBits[]);
-    void addFooter(String footerText); // choose center aligned based on content 
 
-//     void updateFooterText(String footerText);
-    
-    
-    /* Scroller Menu */
-    // void addScroller(String* scrollerTextValues, uint8_t numScrollerValues);
-//     void addScroller(String* scrollerTextValues, void (**scrollermethodList)(), uint8_t numScrollerValues);
-
-    String* keyMapVals;
-    void addMenuKeyMap(String* keyMapVals); // map keypresses to actions and return pressed key
-    
-//     void addScrollerSelect(String* scrollerTextValues, uint8_t numScrollerValues);
-//     uint8_t numScrollerValues;
-
-//     /* Dashboard Interface */
-//     void addDashboard(unsigned char* dbGraphics, String* dbText, uint8_t dbCount);
-
-    void updateDisplay();
-    void autoUpdateDisplay();
-//     void updateDisplay(bool override);
-//     void updateDisplayManual();
-
+    /* ----- NAV + MENU ----- */
     void setNav(void (*functionLeft)(), void (*functionRight)());
-    // void addNav(void (*function1)());
-    // void addNav(void (*sfunction)(char* param));
+    void setNav(void (*navFunction)(char* param));
+    void setNav(void (**navFunctions)());
     
-//     static void drawLoadingScreen();
+    void setMenuKeyMap(String* keyMapVals); // map keypresses to actions and return pressed key
+    void setMenuScroller(String* scrollerVals);
+    
+    /* ----- UPDATE ----- */
+    void clear();
+    void display();     // clear & update screen once
+    void autoDisplay(); // continuous refresh until event
 
-//     void addSimpleMonitor(uint8_t monitorCount);
-    
-    
+
+
     private:
 
-        // header
+        /* ----- HEADER ----- */
         String headerText; String subHeaderText;
         bool headerEnabled = false;
 
-        // footer
+        /* ----- FOOTER ---- */
         String footerText;
         bool footerEnabled = false;
 
-        // navigation
+        /* ----- NAV + MENU ----- */
+        bool navEnabled = false;
+        
         uint8_t menuType = 0;
 
-//     unsigned char** scrollerIconBits;
+        void (*functionLeft)();
+        void (*functionRight)();
+        void (*navFunction)(char* param);
+        void (**navFunctions)();
+        //void (*sfunction)(char* param);
 
-//     uint8_t monitorCount;
-//     bool monitorEn = false;
+        String* scrollerVals;
+        String* keyMapVals;
 
-    uint8_t navCount = 0;
-//     String menuText;
-//     int8_t numArrows;
-    
-//     bool scrollerMenu  = false;
-//     bool scrollerSelectMenu = false;
-//     bool headerEnabled = false;
-
-    
-    bool dynamicFooter = false;
-
-//     int8_t  scrollerPos;
-//     String* scrollerTextValues;
-  
-//     void updateScroller();
-//     String* footerTextValues;
-
-    bool keyMapEnabled = false;
-    void (*sfunction)(char* param);
-
-    void (*functionLeft)();
-    void (*functionRight)();
-//     void (**scrollerMethodList)();
-
-//     unsigned char* dbGraphics;
-//     uint8_t dbCount;
-//     String* dbText;
-
-    void updateHeader();
-    void updateFooter();
-    void updateNav();
+        /* ----- UPDATE ----- */
+        void updateHeader();
+        void updateFooter();
+        void updateNav();
     
 };

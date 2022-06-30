@@ -8,6 +8,7 @@ class FunctionTester {
     static void keyMapTester();
     static void iconTester();
     static void footerTester();
+    static void stringTester(char* param);
   
   
 };

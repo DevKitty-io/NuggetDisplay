@@ -18,10 +18,25 @@
 
 `void .setNav(void (*functionLeft)(),void (*functionRight)())`
 
+### Display 
+
 ### Update
 `void .update()`
 `void .autoUpdate()`
 
 `void.updateHeader()`
 `void.updateFooter()`
-`void.updateNav()`
+
+### Variables
+`bool headerEnabled`
+`bool footerEnabled`
+
+`bool navEnabled`
+
+`uint8_t menuType` n
+| Number | Menu |
+| --- | --- |
+| 0 | None  |
+| 1 | Left / Right Navigation |
+| 2 | Scroller |
+| 3 | KeyMap |

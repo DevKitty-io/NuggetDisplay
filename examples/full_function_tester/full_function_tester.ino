@@ -12,7 +12,8 @@ void setup() {
     display.flipScreenVertically();
     display.setTextAlignment(TEXT_ALIGN_LEFT);
     display.setFont(DejaVu_Sans_Mono_10);
-    FunctionTester::iconTester();
+    
+    FunctionTester::keyMapTester();
 }
 
 
