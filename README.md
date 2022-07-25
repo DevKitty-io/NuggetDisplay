@@ -1,8 +1,4 @@
-# Nugget_Screen
+# NuggetDisplay Library
 
-## Function Documentation
-
-.init()
-.addKeyMap()
-.addHeader()
-.addFooter()
+Documentation and updates coming soon!
+Check out the dev branch for experimental updates.
