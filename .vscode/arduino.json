@@ -1,0 +1,6 @@
+{
+    "configuration": "CDCOnBoot=cdc,MSCOnBoot=default,DFUOnBoot=default,UploadMode=default,PSRAM=disabled,PartitionScheme=default,CPUFreq=240,FlashMode=qio,FlashFreq=80,FlashSize=4M,UploadSpeed=921600,DebugLevel=none",
+    "board": "esp32:esp32:esp32s2",
+    "sketch": "examples/full_function_tester/full_function_tester.ino",
+    "port": "/dev/ttyACM0"
+}

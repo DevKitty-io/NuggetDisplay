@@ -9,6 +9,7 @@ class FunctionTester {
     static void iconTester();
     static void footerTester();
     static void stringTester(char* param);
+    static void scrollerTester();
   
   
 };

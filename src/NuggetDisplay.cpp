@@ -3,11 +3,13 @@
 #define lt_btn 11 // left button
 #define rt_btn 7 // right button
 
+#define maxScrollItems 4
+
 // import Interface library and screen library
-#include "Nugget_Interface.h"
+#include "NuggetDisplay.h"
 #include "Nugget_Buttons.h"
 
-// Navigation 
+// Navigation menu types
 #define keyMapEnabled   menuType==1
 #define scrollerEnabled menuType==2
 
@@ -15,20 +17,20 @@ int8_t press = -1;
 
 Nugget_Buttons nuggButtons(up_btn,dn_btn,lt_btn,rt_btn);
 
-Nugget_Interface::Nugget_Interface() {
+NuggetDisplay::NuggetDisplay() {
 
 }
 
 /* --------------- HEADER --------------- */
 
 // set a single header text value and left align it
-void Nugget_Interface::setHeader(String headerText){
+void NuggetDisplay::setHeader(String headerText){
     headerEnabled = true;
     this->headerText = headerText;
 }
 
 // set header + subheader text
-void Nugget_Interface::setHeader(String headerText, String subHeaderText){
+void NuggetDisplay::setHeader(String headerText, String subHeaderText){
     headerEnabled = true;
     this->headerText = headerText;
     this->subHeaderText = subHeaderText;
@@ -37,7 +39,7 @@ void Nugget_Interface::setHeader(String headerText, String subHeaderText){
 /* --------------- FOOTER --------------- */
 
 // set footer text
-void Nugget_Interface::setFooter(String footerText) {
+void NuggetDisplay::setFooter(String footerText) {
   footerEnabled = true;
   this->footerText = footerText;
   this->footerText.toUpperCase(); // stylistic 
@@ -46,19 +48,19 @@ void Nugget_Interface::setFooter(String footerText) {
 /* --------------- NAVIGATION --------------- */
 
 // set LEFT and/or RIGHT navigation for most interfaces
-void Nugget_Interface::setNav(void (*functionLeft)(), void (*functionRight)()) {
+void NuggetDisplay::setNav(void (*functionLeft)(), void (*functionRight)()) {
   navEnabled = true;
   this->functionLeft = functionLeft;
   this->functionRight = functionRight;
 }
 
 // set UP, DOWN, LEFT, RIGHT navigation for KeyMap menus
-void Nugget_Interface::setNav(void (**navFunctions)()) {
+void NuggetDisplay::setNav(void (**navFunctions)()) {
     navEnabled = true;
     this->navFunctions = navFunctions;
 }
 
-void Nugget_Interface::setNav(void (*navFunction)(char* param)) {
+void NuggetDisplay::setNav(void (*navFunction)(char* param)) {
     navEnabled = true;
     this->navFunction = navFunction;
 }
@@ -66,22 +68,29 @@ void Nugget_Interface::setNav(void (*navFunction)(char* param)) {
 /* --------------- MENU --------------- */
 
 // Menu Type 1
-void Nugget_Interface::setMenuKeyMap(String* keyMapVals) {
+void NuggetDisplay::setMenuKeyMap(String* keyMapVals) {
     this->keyMapVals = keyMapVals;
     menuType = 1;
     navEnabled = true;
 }
 
 // Menu Type 2
-void Nugget_Interface::setMenuScroller(String* scrollerVals) {
+void NuggetDisplay::setMenuScroller(String* scrollerVals) {
     this->scrollerVals = scrollerVals;
+    menuType = 2;
+    navEnabled = true;
+}
+
+void NuggetDisplay::setMenuScroller(String* scrollerVals, uint16_t numScrollerVals) {
+    this->scrollerVals = scrollerVals;
+    this->numScrollerVals = numScrollerVals;
     menuType = 2;
     navEnabled = true;
 }
 
 /* --------------- UPDATE --------------- */
 
-void Nugget_Interface::updateFooter() {
+void NuggetDisplay::updateFooter() {
     if (navEnabled && menuType>0) { footerEnabled = true; }
 
     if (footerEnabled) {
@@ -102,7 +111,7 @@ void Nugget_Interface::updateFooter() {
     }
 }
 
-void Nugget_Interface::updateHeader() {
+void NuggetDisplay::updateHeader() {
 
     if (headerEnabled && menuType!=2) {
         ::display.drawLine(0,13,127,13);
@@ -124,7 +133,7 @@ void Nugget_Interface::updateHeader() {
     }
 }
 
-void Nugget_Interface::updateNav() {
+void NuggetDisplay::updateNav() {
     String direction[] = {"UP", "LT", "RT", "DN" };
     for (int i=0; i<4; i++) {
         if (keyMapVals[i].length() < 10) { ::display.drawString(0,10*i,direction[i]+":"+keyMapVals[i]); }
@@ -134,11 +143,11 @@ void Nugget_Interface::updateNav() {
 
 /* --------------- DISPLAY --------------- */
 
-void Nugget_Interface::clear() { ::display.clear(); }
-void Nugget_Interface::display() { ::display.display(); }
+void NuggetDisplay::clear() { ::display.clear(); }
+void NuggetDisplay::display() { ::display.display(); }
 
 // updates Display & Navigation
-void Nugget_Interface::autoDisplay() { // updates UI display and loops until button input provided
+void NuggetDisplay::autoDisplay() { // updates UI display and loops until button input provided
     press = -1;
 
     if (navEnabled) {
@@ -170,8 +179,25 @@ void Nugget_Interface::autoDisplay() { // updates UI display and loops until but
 
         // Scroller Menu
         else if (scrollerEnabled) {
-            while (true) {
+            scrollerIndex = 0;
 
+            while (press!= 3) {
+                Serial.println(scrollerIndex);
+                clear();
+                press = nuggButtons.getPress();
+                
+                if(nuggButtons.dnPressed() and scrollerIndex<numScrollerVals-1) { scrollerIndex++; }
+                else if (nuggButtons.upPressed() and scrollerIndex>0) { scrollerIndex--; }
+
+                for (uint8_t i = (scrollerIndex / maxScrollItems) * maxScrollItems; i < ((scrollerIndex / maxScrollItems) * maxScrollItems) + maxScrollItems; i++) {
+                    if (i >= numScrollerVals) break;
+                    ::display.drawString(4, (i % maxScrollItems) * 10, scrollerVals[i]);
+                }
+
+                // draw selector line
+                ::display.drawLine(0, (scrollerIndex % maxScrollItems * 10) + 2, 0, (scrollerIndex % maxScrollItems * 10) + 10);
+                updateFooter();
+                display();
             }
         }
 

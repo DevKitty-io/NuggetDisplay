@@ -9,10 +9,10 @@ extern Nugget_Buttons nuggButtons;
 
 // add dashboard, loader bar?
 
-class Nugget_Interface {
+class NuggetDisplay {
 
   public:
-    Nugget_Interface();
+    NuggetDisplay();
 
     /* ----- HEADER ----- */
     void setHeader(String headerText);
@@ -28,6 +28,7 @@ class Nugget_Interface {
     
     void setMenuKeyMap(String* keyMapVals); // map keypresses to actions and return pressed key
     void setMenuScroller(String* scrollerVals);
+    void setMenuScroller(String* scrollerVals, uint16_t numScrollerVals);
     
     /* ----- UPDATE ----- */
     void clear();
@@ -57,7 +58,9 @@ class Nugget_Interface {
         void (**navFunctions)();
         //void (*sfunction)(char* param);
 
-        String* scrollerVals;
+        uint8_t scrollerIndex;
+
+        String* scrollerVals; uint16_t numScrollerVals;
         String* keyMapVals;
 
         /* ----- UPDATE ----- */
